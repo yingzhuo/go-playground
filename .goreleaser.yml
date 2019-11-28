@@ -1,0 +1,62 @@
+# documentation at http://goreleaser.com
+before:
+
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: default
+
+    env:
+      - CGO_ENABLED=0
+
+    main: .
+
+    ldflags:
+      - -s -w -X 'main.BuildVersion={{.Version}}' -X 'main.BuildGitBranch={{.Env.BUILD_GIT_BRANCH}}' -X 'main.BuildGitRev={{.Env.BUILD_GIT_REV}}' -X 'main.BuildGitCommit={{.Env.BUILD_GIT_COMMIT}}' -X 'main.Date={{.Env.BUILD_DATE}}'
+
+    goos:
+      - darwin
+      - linux
+      - windows
+
+    goarch:
+      - amd64
+
+archives:
+
+  - id: default
+
+    replacements:
+      darwin: darwin
+      linux: linux
+      windows: windows
+      386: i386
+      amd64: amd64
+
+    format:
+
+    format_overrides:
+      - goos: windows
+        format: zip
+
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - docs/*
+      - design/*.png
+      - templates/**/*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{.Version}}-snapshot"
+
+changelog:
+  sort: desc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
